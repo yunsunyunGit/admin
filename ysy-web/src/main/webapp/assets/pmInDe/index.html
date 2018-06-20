@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>增减项申请</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1, user-scalable=0, minimal-ui">
+	<script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript" src="js/reqwest.js"></script>
+	<script type="text/javascript" src="js/reqwest.min.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<style type="text/css">
+		body {
+			margin:0;
+			padding:0;
+			background-color: #F1F1F1;
+		}
+		
+		.index_title {
+			background-color: #64CB38;
+			text-align: center;
+			color:white;
+			height:44px;
+			line-height: 44px;
+			border-bottom: 1px solid #787878;
+		}
+		.index_body {
+			border-bottom: 1px solid #AAAAAA;
+			padding: 5px 10px;
+		}
+	</style>
+</head>
+<body>
+<!-- 点击提交，增减项管理页面 -->
+<template id="indexPage">
+	<div>
+		<div class="index_title">增减项管理
+		</div>
+		<div class="rightBtn"  v-on:click="apply()">+</div>
+		<!-- 增减项列表清单 -->
+		<div v-for="data in data1.option" class="index_body" @click="goToDetail(data)">
+			<div class="list_style">
+				<span style="font-weight: bold">增减项单号:{{data.orderNum}}</span>
+				<span class="status_style">状态</span>
+			</div>
+			<div class="list_style">
+				<span style="color:red">{{data.amount}}元</span>
+				<span class="time_style">{{data.createdTime}}</span>
+			</div>
+		</div>
+	</div>
+</template>
+<!-- 主页 -->
+<template id="applyPage">
+	<div v-if="!isOk">
+		<div class="index_title">增减项申请</div>
+		<div>
+			<div class="applyTitle">录入施工增项 
+				<div class="rightBtn"  @click="addBtn1(1)">+</div>
+			</div>
+			<div v-for="data in firstPart">
+				<div>施工项名称:{{data.name}}</div>
+				<div>单位:{{data.unit}}</div>
+				<div>数量:<input type="text" v-model="data.number"></input></div>
+				<div>备注:<input type="text" v-model="data.remarks"></input></div>
+				<div>金额：<span style="color:red" v-model="data.price*data.number">{{data.price*data.number}}</div>
+			</div>
+		</div>
+		<div>
+			<div class="applyTitle">录入施工减项 
+				<div class="rightBtn"  @click="addBtn1(2)">+</div>
+			</div>
+			<div v-for="data in secondPart">
+				<div>施工项名称:{{data.name}}</div>
+				<div>单位:{{data.unit}}</div>
+				<div>数量:<input type="text" v-model="data.number"></input></div>
+				<div>备注:<input type="text" v-model="data.remarks"></input></div>
+				<div>金额：<span style="color:red" v-model="data.price*data.number">{{data.price*data.number}}</div>
+			</div>
+		</div>
+		<div>
+			<div class="applyTitle">录入主材增项 
+				<div class="rightBtn"  @click="addBtn1(3)">+</div>
+			</div>
+			<div v-for="data in thirdPart" class="secondList_style">
+				<div style="font-weight:bold;">材料名称:{{data.name}}</div>
+				<div>单位:{{data.unit}}</div>
+				<div>数量:<input type="text" v-model="data.number"></input></div>
+				<div>备注:<input type="text" v-model="data.remarks"></input></div>
+				<div>金额：<span style="color:red" v-model="data.price*data.number">{{data.price*data.number}}</div>
+			</div>
+		</div>
+		<div>
+			<div class="applyTitle">录入主材减项 
+				<div class="rightBtn"  @click="addBtn1(4)">+</div>
+			</div>
+			<div v-for="data in forthPart" class="secondList_style">
+				<div>材料名称:{{data.name}}</div>
+				<div>单位:{{data.unit}}</div>
+				<div>数量:<input type="text" v-model="data.number"></input></div>
+				<div>备注:<input type="text" v-model="data.remarks"></input></div>
+				<div>金额：<span style="color:red"  v-model="data.price*data.number">{{data.price*data.number}}</span></div>
+			</div>
+		</div>
+
+		<!-- 汇总金额 -->
+		<div class="secondBottom_style">
+			<div>汇总金额:<span style="color:red"></span>元</div>
+			<div><button @click="submitBtn()">提交</button></div>
+		</div>
+	</div>
+	<!-- 主材选择页面 -->
+	<div v-if="isOk">
+		<div class="index_title">
+			<span style="text-align: center">标题</span>
+		</div>
+		<div class="rightEnsureBtn" @click="ensureBtn()">确认</div>
+		<!-- 查询框 -->
+		<div class="searchText">
+			<input type="text" placeholder="请输入施工项关键字"></input>
+		</div>
+		<!-- 主材/施工项列表清单 -->
+		<div v-for="data in data3.option" class="listThird_style">
+			<span>施工项名称：{{data.name}}</span>
+			<input type="radio" name='a' @click="choosen(data)"/>
+		</div>
+	</div>
+</template>
+
+
+<!-- 订单详情页 -->
+<template id="detailPage">
+	<div>
+		<div class="index_title">单号</div>
+		<div class="detailFirst">
+			<div>增减项单号:{{data4.orderNum}}</div>
+			<div>创建日期：{{data4.createdTime}}</div>
+			<div>状态：<span style="color:#64CB38">{{data4.status}}</span></div>
+		</div>
+		<div class="applyTitle">录入施工增项 <span style="float:right;color:blue;">+</span></div>
+		<div v-for="data in data4.constructionAdd" class="secondList_style">			
+			<div>施工项名称:{{data.name}}</div>
+			<div>数量:{{data.amount}}</div>
+			<div>备注:{{data.remarks}}</div>
+			<div>金额：<span style="color:red">{{data.acount}} </span></div>
+			<div>损失金额：<span style="color:red">{{data.lostAcount}} </span></div>
+		</div>
+		<div class="applyTitle">录入施工减项 <span style="float:right;color:blue;">+</span></div>
+		<div v-for="data in data4.constructionDecrease" class="secondList_style">
+			
+			<div>施工项名称:{{data.name}}</div>
+			<div>数量:{{data.amount}}</div>
+			<div>备注:{{data.remarks}}</div>
+			<div>金额：<span style="color:red">{{data.acount}} </span></div>
+			<div>损失金额：<span style="color:red">{{data.lostAcount}} </span></div>
+		</div>
+		</div>
+		<div class="applyTitle">录入主材增项 <span style="float:right;color:blue;">+</span></div>
+		<div v-for="data in data4.constructionAdd" class="secondList_style">
+			
+			<div>材料名称:{{data.name}}</div>
+			<div>单位:{{data.unit}}</div>
+			<div>数量:{{data.amount}}</div>
+			<div>备注:{{data.remarks}}</div>
+			<div>金额：<span style="color:red">{{data.acount}} </span></div>
+			<div>损失金额：<span style="color:red">{{data.lostAcount}} </span></div>
+		</div>
+		<div class="applyTitle">录入主材减项 <span style="float:right;color:blue;">+</span></div>
+		<div v-for="data in data4.constructionDecrease" class="secondList_style">
+			<div>材料名称:{{data.name}}</div>
+			<div>单位:{{data.unit}}</div>
+			<div>数量:{{data.amount}}</div>
+			<div>备注:{{data.remarks}}</div>
+			<div>金额：<span style="color:red">{{data.acount}} </span></div>
+			<div>损失金额：<span style="color:red">{{data.lostAcount}} </span></div>
+		</div>
+		<div  class="detailSecond">
+			<span>汇总金额：<span style="color:red">{{data4.acount}}</span></span>
+			<span>损失金额：<span style="color:red">{{data4.lostacount}}</span></span>
+		</div>
+
+		<div>
+			<div  class="detail_third">审批记录</div>
+			<div class="detail_forth">
+				<span>序号</span>
+				<span>审批结果</span>
+				<span>时间+意见</span>
+			</div>
+		</div>
+	</div>
+</template>
+<!-- 开始 -->
+<div id="begining">
+	<index-page v-if="page1_on" :data1="indexData"></index-page>
+	<apply-page v-if="page2_on" :data3="selectedData"></apply-page>
+	<detail-page v-if="page4_on" :data4="detailData"></detail-page>
+</div>
+</body>
+<script>
+Vue.component('index-page',{
+	template:'#indexPage',
+	props:{
+		data1:Object
+	},
+	// data:function(){
+	// },
+	methods:{
+		apply:function(){
+			obj.$data.page1_on=false;
+			obj.$data.page2_on=true;
+		},
+		goToDetail:function(data){
+			console.log(data);
+			obj.$data.page1_on=false;
+			obj.$data.page4_on=true;
+			var _data={"id":data.id};
+			_data=JSON.stringify(_data);//转成JSON
+			//调用订单详情接口
+			myAjax('json/detail.json',"params="+_data,function(resp){
+				obj.$data.detailData=resp;
+			})
+		}
+	}
+})
+Vue.component('apply-page',{
+	template:'#applyPage',
+	props:{
+		data3:Object
+	},
+	data:function(){
+		// var firstPart=[];
+		var _data={};
+		_data.isOk=false;
+		_data._name="";
+		_data.unit="";
+		_data.price="";
+		_data.firstPart=[];
+		_data.secondPart=[];
+		_data.thirdPart=[];
+		_data.forthPart=[];
+		return _data;
+	},
+	methods:{
+		addBtn1:function(data){
+			this.isOk=true;
+			var _data={}
+			_data.id=data;
+			_data=JSON.stringify(_data);
+			// 通过id调用四种方式的选择列表
+			// myAjax('json/selected.json',"params="+_data,function(resp){
+			// 	obj.$data.selectedData=resp;
+			// })
+			switch(data){
+				case 1: myAjax('json/first.json',"",function(resp){
+								obj.$data.selectedData=resp;
+						});break;
+				case 2: myAjax('json/second.json',"",function(resp){
+								obj.$data.selectedData=resp;
+						});break;
+				case 3: myAjax('json/third.json',"",function(resp){
+								obj.$data.selectedData=resp;
+						});break;
+				case 4: myAjax('json/forth.json',"",function(resp){
+								obj.$data.selectedData=resp;
+						});break;
+			}
+		},
+		choosen:function(data){
+			console.log(data);
+			_name=data.name;
+			_unit=data.unit;
+			_price=data.price;
+			_id=data.id;
+		},
+		ensureBtn:function(){
+			console.log(this.data3.id);
+			if(_name!=""){
+				var keyword={};
+				keyword.name=_name;
+				keyword.unit=_unit;
+				keyword.price=_price;
+				keyword.id=_id;
+				switch(this.data3.id){
+					case 1:this.firstPart.push(keyword);break;
+					case 2:this.secondPart.push(keyword);break;
+					case 3:this.thirdPart.push(keyword);break;
+					case 4:this.forthPart.push(keyword);break;
+				}
+				
+				this.isOk=false;
+			}
+		},
+		submitBtn:function(){
+			var _data=[];
+			var _arr1=tochange(this.firstPart,0);
+			var _arr2=tochange(this.secondPart,1);
+			var _arr3=tochange(this.thirdPart,2);
+			var _arr4=tochange(this.forthPart,3);
+			_data=_arr1.concat(_arr2);
+			_data=_data.concat(_arr3);
+			_data=_data.concat(_arr4);
+			
+			
+			console.log(_data);
+			// 提交增减项申请，参数为四个数组
+			myAjax('../../pmProjectInDe/pmSubmit',"jsonStr="+JSON.stringify(_data),function(resp){
+				console.log("success!"+resp);
+			//再次请求，刷新主页
+				myAjax('json/index.json','',function(resp){
+					obj.$data.page1_on=true;
+					obj.$data.page2_on=false;
+			})
+				
+			})
+			
+			
+		}
+	}
+})
+Vue.component('detail-page',{
+	template:'#detailPage',
+	props:{
+		data4:Object
+	}
+})
+var obj=new Vue({
+	el:'#begining',
+	data:{
+		//控制页面扭转
+		page1_on:true,
+		page2_on:false,
+		page3_on:false,
+		page4_on:false,
+		// 数据
+		indexData:{},
+		detailData:{},
+		selectedData:{},
+	}
+})
+// 初始化开始，请求数据
+myAjax('json/index.json',"",function(resp){
+	obj.$data.indexData=resp;
+})
+
+
+function tochange(arr,id){
+	var returnArr=[];
+	for(var i=0;i<arr.length;i++){
+		var model={};
+		model.increaseDecreaseType=id;
+		model.materialCode=arr[i].id;
+		model.materialName=arr[i].name;
+		model.materialUnit="";
+		model.customerPrice=arr[i].price;//单价
+		model.materialNum=arr[i].number;
+		model.customerAmount=arr[i].price*arr[i].number;
+		model.remark=arr[i].remarks;
+		returnArr.push(model);
+	}
+	return returnArr;
+}
+</script>
+</html>
+
+

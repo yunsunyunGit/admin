@@ -1,0 +1,11 @@
+/* here you can put your own css to customize and override the theme */
+#userinfo.form-control[readonly] {
+    background-color: #fff ;
+}
+#userinfo.form-control[disabled] {
+    background-color: #eeeeee ;
+}
+.nowrap{
+    white-space: nowrap;
+}
+.table-group-actions.pull-right{white-space: nowrap;overflow: hidden;}

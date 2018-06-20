@@ -1,0 +1,21 @@
+﻿{	
+	"id":1,
+	"no":123,
+	"groupName":"研发部",
+	"groupManager":"Kevin",
+	"membersNum":20,
+	"status":"启用",
+	"createdTime":"2016-1-1",	
+	"members":[{
+		"id":1,
+		"username":123,
+		"name":"研发部",
+		"department":"Kevin"
+		},
+		{
+		"id":2,
+		"username":456,
+		"name":"研发部23",
+		"department":"Kevin333"
+		}]
+}

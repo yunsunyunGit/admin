@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtTipMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtTip">
+		<id column="id" property="id" />
+		<result column="mall_id" property="mallId" />
+		<result column="order_id" property="orderId" />
+		<result column="content" property="content" />
+		<result column="sender_id" property="senderId" />
+		<result column="sender_name" property="senderName" />
+		<result column="receiver_id" property="receiverId" />
+		<result column="receiver_name" property="receiverName" />
+		<result column="send_time" property="sendTime" />
+		<result column="receive_time" property="receiveTime" />
+		<result column="read_status" property="readStatus" />
+		<result column="is_new" property="isNew"/>
+		<result column="item_image" property="itemImage"/>
+		<result column="order_num" property="orderNum"/>
+		<result column="logi_num" property="logiNum"/>
+		<result column="is_deleted" property="isDeleted" />
+	</resultMap>
+
+	<update id="updateIsNew">
+		update pt_tip set is_new = 1 WHERE mall_id = #{mallId} and receiver_id = #{memberId}
+	</update>
+</mapper>

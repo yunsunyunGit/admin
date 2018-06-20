@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>群组列表</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" charset="UTF-8" src="../workspace.jsp"></script>
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/reqwest.js"></script>
+    <script type="text/javascript" src="js/reqwest.min.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-datepicker.js"></script>
+</head>
+<body>
+<!--群组列表  -->
+<template id="list_Part">
+    <div class="all_style">
+        <div class="title_style">群组列表</div>
+        <div>
+            <div class="add_style" v-on:click="addGroup()">
+                新增群组
+            </div>
+            <div class="grid_style">
+                <table border="1" style="border-collapse:collapse;border:1px solid #AAAAAA;">
+                    <thead>
+                    <tr class="togray">
+                        <th width="5%">序号</th>
+                        <th width="15%">群组名称</th>
+                        <th width="8%">群管理员</th>
+                        <th width="5%">成员数</th>
+                        <th width="12%">创建时间</th>
+                        <th width="8%">状态</th>
+                        <th width="15%">操作</th>
+                    </tr>
+                    <tr class="second_row">
+                        <td></td>
+                        <td><input type="text" v-model="groupName"/></td>
+                        <td><input type="text" v-model="groupManagerName"/></td>
+                        <td></td>
+                        <td>
+                            <div id="beginTime" class="input-group date date-picker margin-bottom-5"
+                                 data-date-format="yyyy-mm-dd">
+                                <input id="begin" type="text" class="form-control form-filter  input-sm"
+                                       placeholder="搜索开始时间" v-model="searchBeginDate">
+                                <span class="input-group-btn"><button class="btn btn-sm default" type="button"><i
+                                        class="fa fa-calendar"></i></button></span>
+                            </div>
+                            <div id="endTime" class="input-group date date-picker" data-date-format="yyyy-mm-dd">
+                                <input id="end" type="text" class="form-control form-filter  input-sm"
+                                       placeholder="搜索结束时间" v-model="searchEndDate">
+                                <span class="input-group-btn"><button class="btn btn-sm default" type="button"><i
+                                        class="fa fa-calendar"></i></button></span>
+                            </div>
+                        </td>
+                        <td>
+                            <select v-model="status">
+                                <option>启用</option>
+                                <option>禁用</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button id="search_btn" @click="searchGroup()">搜索</button>
+                            <button id="reset_btn" v-on:click="listReset()">重置</button>
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="third_row" v-for="data in store.groupList">
+                        <td></td>
+                        <td>{{data.name}}</td>
+                        <td>{{data.groupOwner}}</td>
+                        <td>{{data.memberNum}}</td>
+                        <td>{{data.create_time}}</td>
+                        <td>{{data.status}}</td>
+                        <td>
+                            <button id="edit_btn" v-on:click="groupEdit(data)">编辑</button>
+                            <button id="delete_btn"
+                                    @click="removeGroup(data)">删除
+                            </button>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagging_style">
+                页
+                <span class="pageChage_btn" @click="prePage();">&lt;</span>
+                <span style="padding:5px 15px;border:1px solid #AAAAAA">{{store.queryOpt.pageNum}}</span>
+                <span class="pageChage_btn" @click="nextPage()">&gt;</span>
+                显示
+                <select style="width:10%" v-model="pageNum" v-on:change="pageChange($event)">
+                    <option v-for="data in store.optionList">{{$index+1}}</option>
+                </select>
+                共<span>{{store.pageCount}}</span>页
+            </div>
+        </div>
+    </div>
+</template>
+<!-- 新增群组 -->
+<template id="add_Part">
+    <div :class="{'touming':isOn}">
+        <div class="all_style">
+            <div class="title_style">新增群组</div>
+            <div class="list_style">
+                <div>
+                    <span>群组名称</span>
+                    <input type="text" v-model="currentGroup.groupName" maxlength="10" placeholder="输入群组名称,长度不超过10"/>
+                </div>
+                <div>
+                    <span>负责人</span>
+                    <input type="text" v-model="currentGroup.groupManagerName" disabled/>
+                    <button id="chosen_btn" v-on:click="selectManager()">选择</button>
+                </div>
+                <div>
+                    <span>状态</span>
+                    <select v-model="currentGroup.status">
+                        <option>启用</option>
+                        <option>禁用</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <div class="add_style" v-on:click="chosenFn()">新增成员</div>
+            </div>
+            <div class="grid_style">
+                <table border="1" style="border-collapse:collapse;border:1px solid #AAAAAA;">
+                    <thead>
+                    <tr class="togray">
+                        <th width="15%">用户名</th>
+                        <th width="15%">姓名</th>
+                        <th width="20%">部门/所属公司</th>
+                        <th width="25%">操作</th>
+                    </tr>
+                    <tr class="second_row">
+                        <td><input type="text" v-model="searchMemberOpt.login_name"/></td>
+                        <td><input type="text" v-model="searchMemberOpt.user_name"/></td>
+                        <td><input type="text" v-model="searchMemberOpt.name"/></td>
+                        <td>
+                            <!--<button id="search_btn" @click="searchMembers()">搜索</button>-->
+                            <!--<button id="reset_btn" @click="resetFnCopy()">重置</button>-->
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="third_row" v-for="member in currentGroup.membersList | filterBy searchMemberOpt.login_name in 'login_name'
+							| filterBy searchMemberOpt.user_name in 'user_name' | filterBy searchMemberOpt.name in 'name'">
+                        <td>{{member.login_name}}</td>
+                        <td>{{member.user_name}}</td>
+                        <td>{{member.name}}</td>
+                        <td>
+                            <button id="delete_btn2" @click="remmovePerson($index)">删除</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagging_style" style="display:none">
+                页
+                <span class="pageChage_btn">&lt;</span>
+                <span style="padding:5px 15px;border:1px solid #AAAAAA">1</span>
+                <span class="pageChage_btn">&gt;</span>
+                显示
+                <select style="width:10%">
+                    <option></option>
+                </select>
+                共2页
+            </div>
+        </div>
+        <div class="partThree_style">
+            <button id="cancel_btn3" @click="toBack()">取消</button>
+            <button id="ensure_btn3" class="submitBtn1" @click="toSure()">确认</button>
+        </div>
+    </div>
+    <div style="width:800px;margin:0px auto;background-color: white;border:1px solid; position: absolute;top:100px;left:20%;text-align: center;padding: 10px"
+         v-if="isOn">
+        <div class="grid_style">
+            <table border="1" style="border-collapse:collapse;border:1px solid #AAAAAA;">
+                <thead>
+                <tr class="togray">
+                    <th width="15%">用户名</th>
+                    <th width="15%">姓名</th>
+                    <th width="20%">部门/所属公司</th>
+                    <th width="25%">操作</th>
+                </tr>
+                <tr class="second_row">
+                    <td><input type="text" v-model="searchSelectMemOpt.username"/></td>
+                    <td><input type="text" v-model="searchSelectMemOpt.name"/></td>
+                    <td><input type="text" v-model="searchSelectMemOpt.department"/></td>
+                    <td>
+                        <button id="personSearch_btn" @click="personSearch_btn()">搜索</button>
+                        <button id="personReset_btn" @click="personReset_btn()">重置</button>
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="third_row" v-for="member in store.selectPersonList">
+                    <td>{{member.login_name}}</td>
+                    <td>{{member.user_name}}</td>
+                    <td>{{member.name}}</td>
+                    <td v-if="isManagerSelect=='2'"><input type="radio" name="selectPerson"
+                                                           @click="clickManager(member)"/></td>
+                    <td v-if="isManagerSelect=='1'"><input type="checkbox" name="selectPerson2"
+                                                           @click="selectMember($event,member)"/></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagging_style">
+            页
+            <span class="pageChage_btn" @click="prePage();">&lt;</span>
+            <span style="padding:5px 15px;border:1px solid #AAAAAA" v-model="pageNum">{{store.querySelectPersonOpt.pageNum}}</span>
+            <span class="pageChage_btn" @click="nextPage()">&gt;</span>
+            显示
+            <select style="width:10%" v-model="pageNum" v-on:change="pageChange($event)">
+                <option v-for="data in store.selectPersonOptionList">{{$index+1}}</option>
+            </select>
+            共<span v-model="pageCount">{{store.selectPersonPageCount}}</span>页
+        </div>
+        <div class="partThree_style">
+            <button id="cancel_btn3" v-on:click="pop_cancel()">取消</button>
+            <button id="ensure_btn3" v-on:click="pop_ensure()">确认</button>
+        </div>
+    </div>
+</template>
+
+<!-- 开始 -->
+<div id="index">
+    <list-part v-if="isShow" ></list-part>
+    <add-part v-if="!isShow"></add-part>
+</div>
+</body>
+<script>
+
+</script>
+</html>

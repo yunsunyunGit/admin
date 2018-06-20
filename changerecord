@@ -1,0 +1,25 @@
+linfei的修改
+  v1.0 app登录时设备设备过慢的修改
+     修改主要类引申其它类的修改  MobileDTORestController类的RegisterInfo  /api/v1/device/register
+     1 MobileDTORestController
+     2 MobileRestService
+     3 QrcodeNumService
+     4 KnResourceDao
+     5 KnRoleModuleFunctionInfoDao
+     .....
+
+
+   v1.1  1 配置中心的配置说明修改  2 pc登录时密码不对的提示修改 3 dataTable列表显示为all为显示不对修改
+     1 ConfigNewController
+     2 confignew/  configList.ftl confgiForm.ftl
+     3 login.jsp
+     4 decorators.xml
+     5 CommonMethod
+     6 assest/global/plugins/data-tables/DT_bootstrap.js
+     7 assest/global/scripts/datatable.js
+
+
+
+
+
+

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtOrderMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtOrder">
+		<id column="id" property="id" />
+		<result column="mall_id" property="mallId" />
+		<result column="member_id" property="memberId" />
+		<result column="address_id" property="addressId" />
+		<result column="merchant_id" property="merchantId" />
+		<result column="logi_id" property="logiId" />
+		<result column="logi_num" property="logiNum" />
+		<result column="order_num" property="orderNum" />
+		<result column="order_status" property="orderStatus" />
+		<result column="create_time" property="createTime" />
+		<result column="create_id" property="createId" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_id" property="updateId" />
+		<result column="ship_time" property="shipTime" />
+		<result column="order_goods_point" property="orderGoodsPoint" />
+		<result column="remark" property="remark" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="complete_time" property="completeTime" />
+		<result column="cancel_reason" property="cancelReason" />
+		<result column="cancel_time" property="cancelTime" />
+		<result column="snapshot_id" property="snapshotId" />
+		<result column="is_new" property="isNew"/>
+		<result column="transfer_point" property="transferPoint" />
+		<result column="rebate_point" property="rebatePoint" />
+		<result column="ordinary_point" property="ordinaryPoint" />
+		<result column="vip_point" property="vipPoint"/>
+	</resultMap>
+
+	<resultMap id="OrdersVoMap" type="com.yunsunyun.point.vo.PtOrdersVo" >
+		<id column="id" property="id" />
+        <result column="order_status" property="orderStatus" />
+        <result column="orderTotal" property="orderTotal" />
+		<result column="order_goods_point" property="orderGoodsPoint"/>
+        <association property="merchant" javaType="com.yunsunyun.point.vo.PtMerchantVo">
+            <id column="id" property="id" />
+            <result column="user_name" property="userName" />
+            <result column="image_address" property="imageAddress" />
+        </association>
+        <collection property="items" column="id" select="getOrderItems"></collection>
+	</resultMap>
+
+	<resultMap id="OrderItemsVoMap" type="com.yunsunyun.point.vo.PtOrderItemVo">
+		<id column="id" property="id" />
+		<result column="order_id" property="orderId" />
+		<result column="goods_id" property="goodsId" />
+		<result column="num" property="num" />
+		<result column="image_url" property="imageUrl" />
+		<result column="name" property="name" />
+		<result column="point" property="point" />
+		<result column="reference_price" property="referencePrice" />
+	</resultMap>
+
+	<resultMap id="orderVo" type="com.yunsunyun.point.vo.PtOrderVo" extends="BaseResultMap"  >
+		<result column="user_name" property="userName"/>
+		<result column="receiver_name" property="receiverName"/>
+	</resultMap>
+
+	<resultMap id="OrderInfoVoMap" type="com.yunsunyun.point.vo.PtOrderInfoVo" extends="OrdersVoMap">
+		<result column="logi_id" property="logiId"/>
+		<result column="logi_num" property="logiNum"/>
+		<result column="order_num" property="orderNum"/>
+		<result column="create_time" property="createTime"/>
+		<result column="ship_time" property="shipTime"/>
+		<result column="complete_time" property="completeTime"/>
+		<result column="cancel_time" property="cancelTime"/>
+		<result column="cancel_reason" property="cancelReason"/>
+		<result column="addr" property="addr" />
+		<result column="receiver_name" property="receiverName"/>
+		<result column="receiver_phone" property="receiverPhone"/>
+	</resultMap>
+
+	<!-- 后台获取订单列表 -->
+	<select id="getPtOrderVoList" resultMap="orderVo">
+		select o.*,e.user_name,a.receiver_name from pt_order o
+		 LEFT JOIN  kn_employee e on o.merchant_id = e.id
+		 LEFT JOIN pt_address a on o.address_id = a.id
+		 <where>
+			 <if test="mallId!=null">
+				 o.mall_id = #{mallId}
+			 </if>
+			 <if test="orderNum!=null">
+				and  o.order_num = #{orderNum}
+			 </if>
+			 <if test="merchantId!=null">
+				 and e.id = #{merchantId}
+			 </if>
+			 <if test="timeStart!=null and timeEnd!=null">
+				and (o.create_time  between #{timeStart} and  #{timeEnd} )
+			 </if>
+			 <if test="pointStart!=null and pointEnd!=null">
+				 and (o.order_goods_point between #{pointStart} and  #{pointEnd} )
+			 </if>
+			 <if test="receiverName!=null">
+				 and a.receiver_name like CONCAT('%','${receiverName}','%' )
+			 </if>
+			 <if test="orderStatus!=null">
+				 and o.order_status = #{orderStatus}
+			 </if>
+			 <if test="merchantId!=null">
+				 and o.merchant_id = #{merchantId}
+			 </if>
+		 </where>
+		order by o.create_time desc
+	</select>
+
+	<!-- 前台获取订单列表 -->
+    <select id="selectPageByStatus" resultMap="OrdersVoMap">
+		select
+			orders.id,orders.order_status,orders.order_goods_point,
+			merchant.id,merchant.user_name,merchant.image_address
+		from
+			pt_order orders
+		left join
+			kn_employee merchant
+		on
+			orders.merchant_id = merchant.id
+        where
+        	orders.mall_id = #{mallId}
+        and
+        	orders.member_id = #{memberId}
+		<if test="orderStatus!=-1">
+			and orders.order_status = #{orderStatus}
+		</if>
+		ORDER BY orders.create_time DESC
+		limit #{pageOffset},#{pageSize}
+    </select>
+
+	<!-- 订单items子查询 -->
+	<select id="getOrderItems" resultMap="OrderItemsVoMap">
+		select
+			items.id,items.order_id,items.goods_id,items.num,items.image_url,items.name,items.point,items.reference_price
+		from
+			pt_order_items items
+		where
+			items.order_id = #{id}
+	</select>
+
+	<!-- 将订单置为已读状态 -->
+	<update id="updateIsNew">
+		update pt_order set is_new = 1 where mall_id = #{mallId} and member_id = #{memberId}
+		<if test="orderStatus!=-1">
+			and order_status = #{orderStatus}
+		</if>
+	</update>
+
+	<select id="getPtOrderVoInfoById" resultMap="OrderInfoVoMap">
+		select
+        	orders.id,orders.order_status,orders.order_goods_point,
+        	orders.logi_id,orders.logi_num,orders.order_num,orders.create_time,orders.ship_time,
+        	orders.complete_time,orders.cancel_time,orders.cancel_reason,CONCAT(address.province,address.city,address.region,address.detail_address) addr,address.receiver_name,address.receiver_phone,
+        	merchant.id,merchant.user_name,merchant.image_address
+        from
+        	pt_order orders
+        left join
+        	kn_employee merchant
+        on
+        	orders.merchant_id = merchant.id
+        left JOIN
+			pt_address address
+		ON
+			orders.address_id = address.id
+        where
+        	orders.id = #{id}
+	</select>
+
+	<select id="getAllOrderIsNewCount" resultType="java.util.HashMap">
+		SELECT count(CASE  WHEN order_status = 0 then order_status end) as payNum,
+				count(CASE  WHEN order_status = 1 then order_status end) AS shipNum,
+				count(CASE  WHEN order_status = 2 then order_status end) AS completeNum,
+				count(CASE  WHEN order_status = 3 then order_status end) AS cancelNum
+				FROM pt_order where member_id = #{memberId} and mall_id = #{mallId};
+	</select>
+
+	<insert id="insertAndReturnId" parameterType="com.yunsunyun.point.po.PtOrder" useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO pt_order ( mall_id, member_id, address_id, merchant_id, order_num, order_status, create_time, create_id, order_goods_point, transfer_point, rebate_point, ordinary_point, vip_point)
+		VALUES (#{mallId},#{memberId},#{addressId},#{merchantId},#{orderNum},#{orderStatus},#{createTime},#{createId},#{orderGoodsPoint},#{transferPoint},#{rebatePoint},#{ordinaryPoint},#{vipPoint});
+	</insert>
+</mapper>

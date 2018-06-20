@@ -1,0 +1,20 @@
+﻿{
+	"option":[{
+		"id":1,
+		"no":123,
+		"groupName":"研发部",
+		"groupManager":"Kevin",
+		"membersNum":20,
+		"createdTime":"2016-1-1",
+		"status":"启动"
+		},
+		{
+		"id":2,
+		"no":123321,
+		"groupName":"交付中心",
+		"groupManager":"孔",
+		"membersNum":53,
+		"createdTime":"2016-11-1",
+		"status":"启动"
+		}]
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtMallCatagoryMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtMallCatagory">
+		<id column="mall_id" property="mallId" />
+		<result column="catagory_id" property="catagoryId" />
+	</resultMap>
+
+	<select id="getCatagoryMallNames" resultType="string">
+		select GROUP_CONCAT(name) from pt_mall LEFT JOIN pt_mall_catagory on pt_mall.id = pt_mall_catagory.mall_id  where catagory_id = #{catagoryId} GROUP BY catagory_id
+	</select>
+
+</mapper>

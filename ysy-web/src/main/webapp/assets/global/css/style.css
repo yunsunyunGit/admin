@@ -1,0 +1,74 @@
+.fontSc {
+    font-family: "微软雅黑 Bold","微软雅黑";
+    font-weight: 700;
+    font-size: 14px;
+    border-color: #eee;
+}
+
+.error{
+    color: #a94442;
+    font-size: 13px;
+    padding-top: 3px;
+    margin-bottom: 3px;
+}
+
+.leftSize_d a{
+    color: #000000;
+    padding-left:2px;
+}
+.leftSize_d a:hover{
+    color: blue;
+    padding-left:2px;
+}
+
+.hiddenDiv{
+    border-radius: 4px;
+    color: #555555;
+    display: block;
+    font-size: 14px;
+    height: 34px;
+    line-height: 1.42857;
+    padding: 8px 12px;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+    width: 100%;
+}
+#tree  li {
+    background-image:url("../img/treeview-default-line.gif");
+}
+#tree .item {
+    cursor: pointer;
+}
+#tree .filename{
+    font-weight: bold;
+    display: inline-block;
+    padding: 5px 0 5px 7px;
+}
+
+#tree  ul {
+    padding-left: 9px;
+    line-height: 1.5em;
+}
+#tree > li.item {
+    background: none;
+}
+
+#tree .fa-download{
+    margin-left: 10px;
+}
+#tree .item-content{
+    position: relative;
+    top:-4px;
+}
+#tree  li {
+    list-style-type: none;
+    background-position: -7px 0;
+    background-repeat: no-repeat;
+    padding-left: 12px;
+}
+#tree li:last-child {
+    background-position: -7px -1767px;
+}
+#tree .create-time {
+    font-size: .9em;
+    color: #777;
+}

@@ -1,0 +1,33 @@
+{
+			"id":1,
+			"company":"圆周2",
+			"department":"交付er部",
+			"address":"清远市",
+			"client":"hello22",
+			"orderNum":"2",
+			"applicant":"豆豆",
+			"status":"3",
+			"fullAmount":"10006",
+			"damagesAmount":"10066",
+			"advise":"",
+			"detail":[{
+				"projName":"good",
+				"type":"2000",
+				"projType":"1",
+				"number":"20",
+				"remarks":"NI",
+				"perPrize":"2000",
+				"perClientPrize":"2000",
+				"perDamagesAmount":""
+			},
+			{
+				"projName":"good2",
+				"type":"20",
+				"projType":"1",
+				"number":"10",
+				"remarks":"NI",
+				"perPrize":"2000",
+				"perClientPrize":"2000",
+				"perDamagesAmount":""
+			}]
+}

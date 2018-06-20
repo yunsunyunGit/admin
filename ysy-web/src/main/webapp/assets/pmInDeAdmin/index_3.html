@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>主页</title>
+	<meta charset="utf-8">
+	<style>
+		body {
+			background-color: gray;
+		}
+		#firstLow,#secondLow {
+			background-color: white;
+			margin: 10px;
+			padding:10px;
+			border-radius: 10px;
+		}
+		#firstLow select,#firstLow input {
+			width:200px;
+			margin:10px;
+		}
+		.theTop {
+			z-index:1000;
+		}
+		.second_style {
+			padding:0px 20px;
+			
+		}
+		.second_style>div{
+			margin: 20px 0px;
+		}
+		.second_style>div>span {
+			display: inline-block;
+    		width: 225px;
+		}
+		.isPlay {
+			display:none;
+		}
+	</style>
+	<script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript" src="js/reqwest.js"></script>
+	<script type="text/javascript" src="js/reqwest.min.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+</head>
+<body>
+
+
+<!-- 第一部分 -->
+<template id="part_one">
+	<div>
+		筛选条件
+		<div id="firstLow">
+			<div class="searchPage">
+				<span>分公司
+					<select v-model="model.company">
+						<option selected="selected">选择分公司</option>
+						<option>深圳</option>
+						<option>成都</option>
+						<option>武汉</option>
+					</select>
+				</span>				
+				<span>部门
+					<select v-model="model.department">
+						<option selected="selected">选择部门</option>
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+					</select>
+				</span>
+				<span>装修地址<input type="text" v-model="model.address"></span></br>
+				<span>客户名称<input type="" v-model="model.client"> </span>
+				<span>单号<input type="" v-model="model.orderNum"></span> 
+				<span>申请人<input type="" v-model="model.applicant"></span></br> 
+				<span>创建日期:<input type="date"  v-model="model.creatDate"></span>				
+				<span id="end_time">至<input type="date" v-model="model.endDate"></span>				
+				<span>状态
+					<select v-model="model.status">
+						<option selected="selected">全部</option>
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+						<option>4</option>
+						<option>5</option>
+					</select>
+				</span>				
+				</br>
+				<div style="float:right;">
+					<button v-on:click="search()" >搜索</button>
+				</div>	
+				<div style="height:1px;clear:right;"></div>		
+			</div>
+			
+		</div>
+	</div>
+</template>
+<!-- 第二部分 -->
+<template id="part_two">
+	<div>
+		增减项列表
+		<div id="secondLow">
+			<div>
+				<table border="1" style="border-collapse:collapse">
+
+					<tr>
+						<th>单号</th>
+						<th>装修地址</th>
+						<th>分公司</th>
+						<th>客户名称</th>
+						<th>部门</th>
+						<th>状态</th>
+						<th>申请人</th>
+						<th>创建日期</th>
+						<th>汇总金额</th>
+						<th>损失金额</th>
+						<th>操作</th>
+					</tr>
+					<tbody v-for="data in model">
+					<tr>
+						<td>{{data.increaseDecreaseCode}}</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>{{data.createdBy}}</td>
+						<td>{{data.createdDate}}</td>
+						<td>{{data.increaseDecreaseAmount}}</td>
+						<td></td>
+						<td>
+							<!-- <a v-if=data.status==1?true:false href="javascript:void(0)" v-on:click="orderApprove(data)">审批</a> -->
+							<a href="javascript:void(0)" v-on:click="orderApprove(data)">审批</a>
+							<a href="javascript:void(0)" v-on:click="search(data)">查询</a>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<div>
+				下拉栏
+			</div>
+		</div>
+	</div>
+</template>
+<!-- 第三部分 -->
+<template id="part_three">
+	<div class="second_style" style="margin:0 auto;width:600px;background-color: #F2F2F2">
+		<div style="text-align: center">增减项详情</div>
+		<div>
+			<span>申请单：{{model.orderNum}}</span>
+			<span>分公司：{{model.company}}</span>
+		</div>
+		<div>
+			<span>部门：{{model.department}}</span>
+			<span>装修地址：{{model.address}}</span>
+		</div>
+		<div>
+			<span>客户名称：{{model.client}}</span>
+			<span>状态：{{model.status}}</span>
+		</div>		
+		<div>增减项明细</div>
+		<table style="background-color: white;border-collapse:collapse"border="1">
+			<thead>
+				<tr>
+					<th>名称</th>
+					<th>类型</th>
+					<th>数量</th>
+					<th>备注</th>
+					<th>客户单价</th>
+					<th>客户金额</th>
+					<th>项目经理单价</th>
+					<th>项目经理金额</th>
+					<th>损失金额</th>
+				</tr>
+				<tr v-for="data_detail in model.list">
+					<td>{{data_detail.materialName}}</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>{{data_detail.customerPrice}}</td>
+					<td></td>
+					<td>{{data_detail.projectManagerAmount}}</td>
+					<td></td>
+					<td><input type="text"  v-model="data_detail.perDamagesAmount"/></td>
+				</tr>
+			</thead>
+		</table>
+		<div style="float:right">
+			<span>汇总金额：</span>
+			<span>损失金额：</span>
+		</div>		
+		<div style="clear:both">
+			<span>
+				<span>处理意见：</span>
+				<textarea v-model="model.voteContent"></textarea>
+			</span>
+		</div>
+		<div style="text-align: center">
+			<button @click='submit()' style="background-color: green;color:white;padding:10px 40px;border-radius:4px;border:1px solid">提交</button>
+			<button @click="toBack()" style="background-color: #FECB16;color:white;padding:10px 40px;border-radius:4px;border:1px solid">关闭</button>
+		</div>
+	</div>
+</template>
+
+<div id="first">
+	<search-part :model="searchData.option" v-if="isShow"></search-part>
+	<lists-part :model="listsData" v-if="isShow"></lists-part>
+	<detail-part :model="detailData" v-if="!isShow"></detail-part>
+</div>
+</body>
+
+<script type="text/javascript">
+var taskId;
+var runId;
+var data1={
+	option:{
+		company:"选择分公司",
+		department:"选择部门",
+		address:"",
+		client:"",
+		orderNum:"",
+		applicant:"",
+		creatDate:"",
+		endDate:"",
+		status:"全部"
+	}
+}
+var data2=[];
+var data3=[];
+ Vue.component('search-part',{
+     	template:'#part_one',
+     	props: {
+            model:Object
+        },
+     	data:function(){
+     		console.log(this);
+     		return{
+     		}
+     	},
+     	methods:{
+     		search:function(){
+				myAjax('first.json',this.model,function(resp){
+					  console.log(resp);
+				      console.log(obj1.$data.listsData);
+				      obj1.$data.listsData=resp;
+				})
+     		}
+     	}
+     })
+var listPart = Vue.component('lists-part',{
+     	template:'#part_two',
+     	props: {
+            model: Array
+        },
+     	data:function(){
+     		console.log(this);
+     		return{
+     		}
+     	},
+     	methods:{
+     		orderApprove:function(data){
+     			var vm = this;
+     			console.log(data);				
+				// 调用审批接口，通过id进行选择
+				myAjax('../../pmProjectInDe/getById', data,function(resp){
+				      obj1.$data.detailData=resp;
+				      obj1.$data.isShow=false;
+				})
+     		},
+     		search:function(data){
+     			this.isshow=!this.isshow;
+     			myAjax('second.json',data.id,function(resp){
+				      obj1.$data.detailData=resp;
+				})
+     		}
+     	}
+     })
+  Vue.component('detail-part',{
+     	template:'#part_three',
+     	props: {
+            model:Object,
+        },
+     	data:function(){
+     		console.log(this);
+     		return{
+     		}
+     	},
+     	methods:{
+     		submit:function(){
+     			console.log(this);
+     			this.model.voteAgree = 1;
+     			var _data = this.model;
+     			// 提交审核
+				myAjax('../../pmProjectInDe/orderSubmit',_data,function(resp){
+			      	console.log("提交成功"+resp)
+				});
+     		},
+     		toBack:function(data){
+     			obj1.$data.isShow=true;
+     		}
+     	}
+     })
+
+	var obj1 = new Vue({
+		el : "#first",
+		data : {
+			searchData : data1,
+			listsData : data2,
+			detailData : data3,
+			isShow : true
+		},
+		ready: function() {
+			var vm = this;
+			// 开始加载
+			myAjax('../../pmProjectInDe/getTasksByAccount',
+					"pageSize=20&currentPage=1", function(resp) {
+				console.log(resp);
+				console.log(obj1.$data.listsData);
+				var list = resp.list;
+				vm.listsData = list;
+			});
+		}
+	});
+
+	//var _data={pageSize:20,currentPage:1};
+	//_data=JSON.stringify(_data);
+</script>
+</html>

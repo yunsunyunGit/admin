@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtMallGoodsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtMallGoods">
+		<id column="mall_id" property="mallId" />
+		<result column="goods_id" property="goodsId" />
+	</resultMap>
+
+
+	<select id="selectMallIdByGoodsId"  resultType="long">
+		select mall_id from pt_mall_goods
+		<where >
+			goods_id = #{goodsId}
+		</where>
+	</select>
+
+</mapper>

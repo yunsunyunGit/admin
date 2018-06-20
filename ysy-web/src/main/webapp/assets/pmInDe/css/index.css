@@ -1,0 +1,133 @@
+.rightBtn {
+	position: absolute;
+	right: 5px;
+	top:0px;
+	color:#177AFD;
+	font-size: 30px;
+	padding-right:10px;
+	line-height: 44px;
+}
+
+.status_style {
+	display:block;
+	position: absolute;
+	top:5px;
+	right:20px;
+	background-color: #64CB38;
+	color:white;
+	border-radius:36%;
+	border:1px solid #6E6E6E;
+	padding:5px 25px;
+}
+.list_style {
+	position: relative;
+	padding:10px;
+}
+.time_style {
+	display:block;
+	position: absolute;
+	top:5px;
+	right:20px;
+	color:#6E6E6E;
+}
+.applyTitle {
+	background-color: #A0A0A0;
+	color:white;
+	padding:10px;
+	border-bottom: 1px solid #787878;
+	position: relative;
+}
+.secondList_style {
+	padding:5px 10px;
+	margin-bottom: 5px;
+	background-color: white;
+	border-bottom: 1px solid black;
+}
+.secondList_style>div {
+	border-bottom: 1px dashed #787878;
+	padding: 3px;
+}
+.secondList_style>div>input {
+	width:83%;
+}
+.secondBottom_style {
+	width:100%;
+	background-color:#F1F1F1;
+	padding-top:10px;
+}
+.secondBottom_style>div:first-child {
+	padding:5px 10px;
+	border:1px solid black;
+	background-color: #64CB38;
+	width:100%;
+}
+.secondBottom_style>div:last-child {
+	text-align: center;
+	padding:10px 30px;
+}
+.secondBottom_style>div>button {
+	width:100%;
+	background-color: #64CB99;
+	color:white;
+	border-radius: 30%;
+	padding:10px;
+	border:1px solid black;
+}
+.rightEnsureBtn {
+	position: absolute;
+	right: 5px;
+	top:0px;
+	color:#177AFD;
+	padding-right:10px;
+	line-height: 44px;
+}
+.searchText {
+	padding:5px 10px;
+}
+.searchText>input {
+	border:1px solid #F1F1F1;
+	border-radius: 15px;
+	width:95%;
+	padding:5px;
+}
+.listThird_style {
+	border-bottom:1px solid black;
+	border-top:1px solid black;
+	font-weight: bold;
+	margin-bottom: 10px;
+	background-color: white;
+	padding:5px 10px;
+}
+.listThird_style>input {
+	float:right;
+}
+/*详情页样式*/
+.detailFirst {
+	padding:5px 10px;
+	border-bottom: 1px solid black;
+}
+.detailFirst>div:first-child {
+	font-weight: bold;
+	padding-bottom: 20px;
+}
+.detailFirst>div:last-child {
+	padding-top:20px;
+}
+.detailSecond {
+	background-color: #64CB38;
+	margin:10px 0px;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+	padding:5px 10px;
+}
+.detail_third {
+	border-top:1px solid black;
+	border-bottom: 1px solid black;
+	width:100%;
+	background-color: #F1F1F1;
+	padding: 10px 5px;
+}
+.detail_forth {
+	background-color: white;
+	padding:20px 10px;
+}

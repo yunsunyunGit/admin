@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtGoodsSnapshotMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtGoodsSnapshot">
+		<id column="id" property="id" />
+		<result column="goods_id" property="goodsId" />
+		<result column="merchant_id" property="merchantId" />
+		<result column="name" property="name" />
+		<result column="sn" property="sn" />
+		<result column="description" property="description" />
+		<result column="point" property="point" />
+		<result column="introduce" property="introduce" />
+		<result column="stock" property="stock" />
+		<result column="seq" property="seq" />
+		<result column="grade" property="grade" />
+		<result column="comment" property="comment" />
+		<result column="image_url" property="imageUrl" />
+		<result column="reference_price" property="referencePrice" />
+		<result column="audit_disable_reason" property="auditDisableReason" />
+		<result column="audit_state" property="auditState" />
+		<result column="market_state" property="marketState" />
+		<result column="is_in_home" property="isInHome" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="view_count" property="viewCount" />
+		<result column="buy_count" property="buyCount" />
+		<result column="meta_keywords" property="metaKeywords" />
+		<result column="create_id" property="createId" />
+		<result column="create_time" property="createTime" />
+		<result column="update_id" property="updateId" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+
+	<insert id="insertGoodsSnapshotReturnId" parameterType="com.yunsunyun.point.po.PtGoodsSnapshot" useGeneratedKeys="true" keyProperty="id"  >
+		INSERT INTO pt_goods_snapshot (goods_id,merchant_id, name, sn, point, stock, seq, image_url, reference_price, audit_state, market_state, goods_type, create_id, create_time)
+		VALUES (#{goodsId},#{merchantId},#{name},#{sn},#{point},#{stock},#{seq},#{imageUrl},#{referencePrice},#{auditState},#{marketState},#{goodsType},#{createId},#{createTime})
+	</insert>
+
+	<select id="selectGoodsSnapshotPage" resultMap="BaseResultMap"  >
+		select id as goods_id,merchant_id,name,sn,description,point,introduce,stock,seq,grade,comment,image_url,reference_price,audit_disable_reason,audit_state,market_state,goods_type,is_deleted,view_count,buy_count,meta_keywords,create_id,create_time,update_id,update_time
+		from pt_goods s
+		<where>
+			(s.audit_state=0 or s.audit_state =2) and s.is_deleted = 0
+			<if test="sn!=null">
+				and s.sn like CONCAT('%','${sn}','%' )
+			</if>
+			<if test="name!=null">
+				and s.name like CONCAT('%','${name}','%' )
+			</if>
+			<if test="reference_price_start!=null and reference_price_end!=null">
+				and (s.reference_price between #{reference_price_start} and  #{reference_price_end}  )
+			</if>
+			<if test="point_start!=null and point_end!=null">
+				and (s.point between #{point_start} and  #{point_end}  )
+			</if>
+			<if test="market_state!=null">
+				and s.market_state = #{market_state}
+			</if>
+			<if test="audit_state!=null">
+				and s.audit_state = #{audit_state}
+			</if>
+			<if test="merchant_id!=null">
+				and s.merchant_id = #{merchant_id}
+			</if>
+		</where>
+		UNION
+		select goods_id ,merchant_id,name,sn,description,point,introduce,stock,seq,grade,comment,image_url,reference_price,audit_disable_reason,audit_state,market_state,goods_type,is_deleted,view_count,buy_count,meta_keywords,create_id,create_time,update_id,update_time
+		from pt_goods_snapshot g
+		<where>
+			(g.audit_state=0 or g.audit_state=2)  and g.is_deleted = 0
+			<if test="sn!=null">
+				and g.sn like CONCAT('%','${sn}','%' )
+			</if>
+			<if test="name!=null">
+				and g.name like CONCAT('%','${name}','%' )
+			</if>
+			<if test="reference_price_start!=null and reference_price_end!=null">
+				and (g.reference_price between #{reference_price_start} and  #{reference_price_end}  )
+			</if>
+			<if test="point_start!=null and point_end!=null">
+				and (g.point between #{point_start} and  #{point_end}  )
+			</if>
+			<if test="market_state!=null">
+				and g.market_state = #{market_state}
+			</if>
+			<if test="merchant_id!=null">
+				and g.merchant_id = #{merchant_id}
+			</if>
+			<if test="audit_state!=null">
+				and g.audit_state = #{audit_state}
+			</if>
+		</where>
+		<choose>
+			<when test="point != null and point == 'ASC' ">ORDER BY point ASC </when>
+			<when test="point != null and point == 'DESC'">ORDER BY point DESC</when>
+		</choose>
+	</select>
+
+</mapper>

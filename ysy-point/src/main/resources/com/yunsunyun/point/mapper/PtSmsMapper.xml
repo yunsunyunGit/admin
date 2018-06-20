@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtSmsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtSms">
+		<id column="id" property="id" />
+		<result column="mall_id" property="mallId" />
+		<result column="content" property="content" />
+		<result column="sender_name" property="senderName" />
+		<result column="sender_phone" property="senderPhone" />
+		<result column="receiver_name" property="receiverName" />
+		<result column="receiver_phone" property="receiverPhone" />
+		<result column="send_time" property="sendTime" />
+		<result column="receive_time" property="receiveTime" />
+		<result column="sms_status" property="smsStatus" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+</mapper>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
+    <description>Spring公共配置</description>
+    <beans>
+		<!--  读取配置文件 -->
+		<context:property-placeholder location="classpath:app.properties" />
+		<!-- JDBC连接池 -->
+		<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+			<property name="driverClass" value="${jdbc.driver}"></property>
+			<property name="jdbcUrl" value="${jdbc.url}"></property>
+			<property name="user" value="${jdbc.username}"></property>
+			<property name="password" value="${jdbc.password}"></property>
+			<property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+			<property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
+			<property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>
+			<property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>
+			<property name="acquireIncrement" value="${jdbc.acquireIncrement}"></property>
+			<property name="maxStatements" value="${jdbc.maxStatements}"></property>
+		</bean>
+		
+		<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />
+		
+		<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
+		<context:component-scan base-package="com.kingnode,com.yunsunyun">
+		    <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		    <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+		</context:component-scan>
+		
+		<!-- Jpa Entity Manager 配置 -->
+	    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+			<property name="dataSource" ref="dataSource" />
+			<property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter" />
+			<property name="packagesToScan" value="com.kingnode,com.yunsunyun" />
+			<property name="persistenceProviderClass" value="org.hibernate.jpa.HibernatePersistenceProvider" />
+		    <property name="jpaProperties">
+				<props>
+					<!--用来后台输出sql-->
+					<prop key="hibernate.format_sql">false</prop>
+					<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+					<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
+					<prop key="hibernate.cache.use_query_cache">true</prop>
+					<prop key="net.sf.ehcache.configurationResourceName">cache/ehcache-hibernate-local.xml</prop>
+					<!-- 命名规则 My_NAME->MyName -->
+					<prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+				</props>
+		    </property>
+		</bean>
+	
+		<bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		    <property name="databasePlatform">
+		        <bean factory-method="getDialect" class="com.kingnode.diva.persistence.Hibernates">
+		            <constructor-arg ref="dataSource" />
+		        </bean>
+		    </property>
+		    <property name="showSql" value="true" />
+		    <!-- 实体与数据库表的映射 -->
+		    <property name="generateDdl" value="false" />
+		</bean>
+		
+		<!-- Jpa 事务配置 -->
+		<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		    <property name="entityManagerFactory" ref="entityManagerFactory" />
+		</bean>
+	
+	    <!-- 缓存配置 -->
+	    <bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+	        <property name="configLocation" value="classpath:cache/ehcache.xml" />
+	        <property name="shared" value="true" />
+	    </bean>
+	    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+	        <property name="cacheManager" ref="ehCacheManager" />
+	    </bean>
+	
+		<!-- Redis配置 -->
+		<!-- jedis pool配置 -->
+		<bean id="redisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+			<property name="maxIdle" value="${redis.maxIdle}" />
+			<property name="maxTotal" value="${redis.maxTotal}" />
+			<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+		</bean>
+
+		<bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+			  p:usePool="true"
+			  p:hostName="${redis.host}"
+			  p:port="${redis.port}"
+			  p:timeout="${redis.timeout}"
+			  p:password="${redis.password}"
+			  p:poolConfig-ref="redisPoolConfig" />
+
+		<!-- The sample config of the Redis Master Slave Sentinels -->
+		<!--
+			<bean id="redisSentinelConfiguration" class="com.coracle.rosefinch.core.delegate.CoracleRedisSentinelConfiguration"
+				p:masterName="${redis.sentinel_master_name}" p:sentinelsString="${redis.sentinels}" />
+			<bean id="jedisConnFactory"
+				  class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+				  p:usePool="true" p:password="${redis.password}"
+				  p:timeout="${redis.timeout}"
+				  p:poolConfig-ref="redispPoolConfig" >
+					  <constructor-arg ref="redisSentinelConfiguration" />
+			</bean>
+        -->
+		<!-- redis template definition -->
+		<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" p:connectionFactory-ref="jedisConnFactory"/>
+		<bean id="redisServiceMxm" class="com.yunsunyun.xsimple.mxm.util.RedisServiceMxm">
+		    <property name="redisTemplate">  
+		        <ref bean="redisTemplate" />  
+		    </property>  
+		</bean>  
+		
+		<!-- 配置多版本数据库兼容支持 -->
+	    <bean id="vendorProperties"  
+		    class="org.springframework.beans.factory.config.PropertiesFactoryBean">  
+		    <property name="properties">  
+		        <props>  
+		            <prop key="Oracle">oracle</prop>  
+		            <prop key="MySQL">mysql</prop>  
+		        </props>  
+		    </property>  
+		</bean>  
+		  
+		<bean id="databaseIdProvider" class="org.apache.ibatis.mapping.VendorDatabaseIdProvider">  
+		    <property name="properties" ref="vendorProperties" />  
+		</bean>
+
+		<!-- define the SqlSessionFactory -->
+		<bean id="sqlSessionFactoryBean" class="com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean">
+			<property name="dataSource" ref="dataSource" />
+			<property name="mapperLocations" value="classpath:com/yunsunyun/*/mapper/*Mapper.xml"/>
+			<property name="databaseIdProvider" ref="databaseIdProvider" />
+			<property name="typeAliasesPackage" value="com.baomidou.springmvc.model"/>
+			<!--<property name="configuration">-->
+			<!--<bean class="org.apache.ibatis.session.Configuration">-->
+			<!--<property name="mapUnderscoreToCamelCase" value="true" />-->
+			<!--</bean>-->
+			<!--</property>-->
+			<property name="plugins">
+				<array>
+					<!-- 分页插件配置 -->
+					<bean id="paginationInterceptor" class="com.baomidou.mybatisplus.plugins.PaginationInterceptor">
+					</bean>
+				</array>
+			</property>
+			<!-- 全局配置注入 -->
+			<property name="globalConfig" ref="globalConfig" />
+		</bean>
+
+		<!-- 定义 MP 全局策略 -->
+		<bean id="globalConfig" class="com.baomidou.mybatisplus.entity.GlobalConfiguration">
+			<!-- 主键策略配置 -->
+			<!-- 可选参数
+                AUTO->`0`("数据库ID自增")
+                INPUT->`1`(用户输入ID")
+                ID_WORKER->`2`("全局唯一ID")
+                UUID->`3`("全局唯一ID")
+            -->
+			<property name="idType" value="2"/>
+
+			<!-- 数据库类型配置 -->
+			<!-- 可选参数（默认mysql）
+                MYSQL->`mysql`
+                ORACLE->`oracle`
+                DB2->`db2`
+                H2->`h2`
+                HSQL->`hsql`
+                SQLITE->`sqlite`
+                POSTGRE->`postgresql`
+                SQLSERVER2005->`sqlserver2005`
+                SQLSERVER->`sqlserver`
+            -->
+			<property name="dbType" value="mysql"/>
+
+			<!-- 全局表为下划线命名设置 true -->
+			<property name="dbColumnUnderline" value="true"/>
+		</bean>
+		<!--&lt;!&ndash; define the SqlSessionFactory &ndash;&gt;-->
+		<!--<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+		    <!--<property name="dataSource" ref="dataSource" />-->
+		    <!--<property name="databaseIdProvider" ref="databaseIdProvider" />-->
+			<!--<property name="configuration">-->
+				<!--<bean class="org.apache.ibatis.session.Configuration">-->
+					<!--<property name="mapUnderscoreToCamelCase" value="true" />-->
+				<!--</bean>-->
+			<!--</property>-->
+		<!--</bean>-->
+		
+		<!-- scan for mappers and let them be autowired -->
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean" />
+			<property name="basePackage" value="com.yunsunyun.*.mapper" />
+		</bean>
+
+		<!-- JSR303 Validator定义 -->
+		<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+		<!-- Spring Data Jpa配置 -->
+		<jpa:repositories base-package="com.kingnode,com.yunsunyun" transaction-manager-ref="transactionManager" entity-manager-factory-ref="entityManagerFactory" />
+		
+		<!-- 使用annotation定义事务 -->
+		<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+		
+		<!-- 定义aspectj -->
+		<aop:aspectj-autoproxy proxy-target-class="true" />
+		<task:annotation-driven />
+		<cache:annotation-driven cache-manager="cacheManager" />
+		
+		<import resource="classpath*:META-INF/cxf/cxf.xml"/>
+		<import resource="classpath*:META-INF/cxf/cxf-extension-xml.xml"/>
+		<import resource="classpath*:META-INF/cxf/cxf-servlet.xml"/>
+		
+		<dubbo:application name="${dubbo.application.name}" logger="${dubbo.application.logger}" owner="${dubbo.application.owner}" organization="${dubbo.application.organization}"/>
+		<dubbo:registry address="${dubbo.registry.address}"/>
+    </beans>
+	<beans profile="dev">
+		<import resource="classpath*:/META-INF/spring/*-facade.xml"/>
+	</beans>
+	<beans profile="sit">
+		<bean class="com.yunsunyun.rosefinch.support.config.DubboConfiguration"></bean>
+		<import resource="classpath*:/META-INF/dubbox/*-facade.xml"/>
+	</beans>
+</beans>

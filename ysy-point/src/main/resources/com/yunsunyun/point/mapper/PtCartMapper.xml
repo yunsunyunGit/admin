@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtCartMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtCart">
+		<id column="id" property="id" />
+		<result column="goods_id" property="goodsId" />
+		<result column="goods_num" property="goodsNum" />
+		<result column="merchant_id" property="merchantId" />
+		<result column="member_id" property="memberId" />
+		<result column="mall_id" property="mallId" />
+	</resultMap>
+
+	<!-- 前台购物车Vo视图 -->
+	<resultMap id="CartVo" type="com.yunsunyun.point.vo.PtCartVo">
+		<id column="id" property="id" />
+		<result column="user_name" property="userName" />
+		<result column="mall_id" property="mallId" />
+		<result column="member_id" property="memberId" />
+		<result column="image_address" property="imageAddress" />
+		<collection property="items" column="{id=id,mallId=mall_id,memberId=member_id}" select="getCartItems"></collection>
+	</resultMap>
+
+	<!-- 前台购物车结算视图 -->
+	<resultMap id="SecondCartVo" type="com.yunsunyun.point.vo.PtCartVo">
+		<id column="id" property="id" />
+		<result column="user_name" property="userName" />
+		<result column="mall_id" property="mallId" />
+		<result column="member_id" property="memberId" />
+		<result column="image_address" property="imageAddress" />
+	</resultMap>
+
+	<!-- CartItemVo视图 -->
+	<resultMap id="CartItemVo" type="com.yunsunyun.point.vo.PtCartItemVo">
+		<id column="id" property="id"/>
+		<result column="goods_id" property="goodsId"/>
+		<result column="goodsName" property="goodsName"/>
+		<result column="goods_num" property="goodsNum"/>
+		<result column="point" property="point"/>
+		<result column="reference_price" property="referencePrice"/>
+		<result column="image_url" property="imageUrl"/>
+		<result column="sn" property="sn"/>
+		<result column="is_deleted" property="isDeleted"/>
+		<result column="isMarket" property="isMarket"/>
+	</resultMap>
+
+	<!-- 订单购物车Vo视图 -->
+	<resultMap id="OrderCartVo" type="com.yunsunyun.point.vo.PtCartVo">
+		<id column="id" property="id" />
+		<result column="user_name" property="userName" />
+		<result column="mall_id" property="mallId" />
+		<result column="member_id" property="memberId" />
+		<result column="image_address" property="imageAddress" />
+		<collection property="items" resultMap="CartItemVo"></collection>
+	</resultMap>
+
+	<sql id="ajaxCartListSql">
+		select
+			merchant.id,merchant.user_name,cart.mall_id,cart.member_id,merchant.image_address
+		FROM
+			pt_cart cart
+		LEFT JOIN
+			kn_employee merchant
+		ON
+			cart.merchant_id = merchant.id
+	</sql>
+
+	<sql id="getCartItemsSql">
+		select
+			cart.id,cart.goods_id,good.name as goodsName,cart.goods_num,
+			good.point,good.reference_price,good.image_url,good.sn,good.is_deleted,(select count(*) from pt_mall_goods mall WHERE mall.goods_id = good.id and mall.mall_id = #{mallId} ) as isMarket
+		FROM
+			pt_cart cart
+		left join
+			pt_goods good
+		on
+			cart.goods_id = good.id
+	</sql>
+
+	<select id="ajaxCartListByMallIdMemberId" resultMap="CartVo">
+		<include refid="ajaxCartListSql"/>
+		where
+			cart.mall_id = #{mallId}
+		and
+			cart.member_id = #{memberId}
+		GROUP BY merchant.id
+		LIMIT #{offset},#{pageSize}
+	</select>
+
+	<select id="getCartItems" resultMap="CartItemVo">
+		<include refid="getCartItemsSql"/>
+		WHERE
+			cart.merchant_id = #{id}
+		AND
+			cart.mall_id = #{mallId}
+		and
+			cart.member_id = #{memberId}
+	</select>
+
+	<select id="ajaxCartListByIds" resultMap="SecondCartVo">
+		<include refid="ajaxCartListSql"/>
+		where
+			cart.mall_id = #{mallId}
+		and
+			cart.member_id = #{memberId}
+		<if test="ids != null">
+			AND
+				cart.id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+		</if>
+		GROUP BY merchant.id
+	</select>
+
+	<select id="secondGetCartItems" resultMap="CartItemVo">
+		<include refid="getCartItemsSql"/>
+		WHERE
+		cart.merchant_id = #{id}
+		AND
+		cart.mall_id = #{mallId}
+		and
+		cart.member_id = #{memberId}
+		<if test="ids != null">
+			AND
+			cart.id IN
+			<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getCartCountByMallIdMemberId" resultType="java.lang.Integer">
+		select count(id) from (
+			select
+				merchant.id
+			FROM
+				pt_cart cart
+			LEFT JOIN
+				kn_employee merchant
+			ON
+				cart.merchant_id = merchant.id
+			where
+				cart.mall_id = #{mallId}
+			and
+				cart.member_id = #{memberId}
+			GROUP BY merchant.id) count;
+	</select>
+
+	<select id="ajaxCartListByCartIds" resultMap="OrderCartVo">
+		select
+			merchant.id,merchant.user_name,cart.mall_id,cart.member_id,merchant.image_address
+		FROM
+			pt_cart cart
+		LEFT JOIN
+			kn_employee merchant
+		ON
+			cart.merchant_id = merchant.id
+		where
+			cart.id
+		IN
+		<foreach collection="cartIds" item="id" index="index"
+				 open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+		GROUP BY merchant.id,cart.mall_id,cart.member_id
+	</select>
+
+	<select id="ajaxCartItemsListByCartIds" resultMap="CartItemVo">
+		select
+		cart.id,cart.goods_id,good.name as goodsName,cart.goods_num,
+		good.point,good.reference_price,good.image_url,good.sn
+		FROM
+		pt_cart cart
+		left join
+		pt_goods good
+		on
+		cart.goods_id = good.id
+		WHERE
+		cart.id
+		IN
+		<foreach collection="cartIds" item="id" index="index"
+				 open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+		and
+		cart.merchant_id = #{merchantId}
+	</select>
+
+	<update id="updateGoodsNumById" parameterType="com.yunsunyun.point.po.PtCart">
+		update pt_cart set goods_num = #{goodsNum} where id = #{id};
+	</update>
+</mapper>

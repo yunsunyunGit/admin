@@ -1,0 +1,118 @@
+.all_style {
+			margin:10px 5px;
+			border-radius: 4px;
+			border:1px solid #AAAAAA;
+		}
+.title_style {
+	background-color: #AAAAAA;
+	color:white;
+	font-size: 20px;
+	padding:5px;
+}
+.add_style {
+	margin: 10px 20px;
+	background-color:#73B847;
+	color:white;
+	border-radius: 2px;
+	padding:5px;
+	width: 100px;
+	text-align: center;
+}
+.grid_style {
+	margin:10px 20px;
+}
+.pagging_style {
+	margin:20px;
+}
+.pageChage_btn {
+	background-color:#E6E6E6;
+	padding:5px 10px ;
+}
+.togray  {
+	background-color: #E6E6E6;
+}
+.togray>th {
+	padding:20px 0;
+	color: #606060;
+}
+.second_row>td {
+	padding:10px;
+	text-align: center;
+}
+.second_row>td>input,select {
+	width: 100%;
+}
+.third_row>td {
+	text-align: center;
+	padding:10px;
+}
+#edit_btn {
+	background-color: white;
+	color: #2E9AFF;
+	border: 0;
+	border-right: 1px solid blue;
+}
+#delete_btn,#delete_btn2 {
+	background-color: white;
+	color: #2E9AFF;
+	border: 0;
+}
+#search_btn {
+	color:white;
+	padding:10px 20px;
+	background-color: #F7931E;
+	border:0; 
+	margin:0; 
+}
+#reset_btn {
+	color:white;
+	padding:10px 20px;
+	background-color: #F77154;
+	border:0;
+	margin:0; 
+}
+/*part-two*/
+.list_style {
+	margin:15px 20px;
+	border-bottom: 1px solid #AAAAAA;
+}
+.list_style>div {
+	padding: 10px 0;
+}
+.list_style>div>span {
+	display: inline-block;
+	width:6%;
+}
+
+.list_style>div>select,input {
+	width: 30%
+}
+#chosen_btn {
+	border:0;
+	color:white;
+	padding:5px 15px;
+	background-color: #73B847;
+}
+/*part3*/
+.partThree_style {
+	text-align: center;
+	margin:0px;
+}
+#cancel_btn3 {
+	padding:5px 20px;
+	color:white;
+	background-color: #F77154;
+	border: 0;
+}
+#ensure_btn3 {
+	padding:5px 20px;
+	color:white;
+	background-color: #73B847;
+	border: 0;
+}
+.touming {
+	opacity: 0.5;
+}
+th {
+	text-align: center !important;
+}

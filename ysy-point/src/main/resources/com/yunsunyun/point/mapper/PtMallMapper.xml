@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtMallMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtMall">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="app_name" property="appName" />
+		<result column="description" property="description" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="create_id" property="createId" />
+		<result column="create_time" property="createTime" />
+		<result column="update_id" property="updateId" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+	<resultMap id="mallVo" type="com.yunsunyun.point.vo.PtMallVo" extends="BaseResultMap">
+		<result column="merchant_num" property="merchantNum"/>
+	</resultMap>
+
+	<select id="getPageMallVo"  resultMap="mallVo" >
+		select m.*,(select count(*) from pt_mall_merchant p where m.id=p.mall_id) as merchant_num from pt_mall m
+		<where>
+			 m.is_deleted = 0
+			<if test="mallName!=null">
+			  and m.name like CONCAT('%','${mallName}','%' )
+			</if>
+		</where>
+	</select>
+
+</mapper>

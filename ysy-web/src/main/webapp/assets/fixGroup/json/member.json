@@ -1,0 +1,13 @@
+﻿{"option":[{
+		"id":1,
+		"username":"hello",
+		"name":"peter",
+		"department":"销售"
+		},
+		{
+		"id":2,
+		"username":"fine",
+		"name":"lizza",
+		"department":"crm"
+		}]
+}

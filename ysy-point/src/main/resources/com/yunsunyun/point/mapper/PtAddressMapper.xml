@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunsunyun.point.mapper.PtAddressMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.yunsunyun.point.po.PtAddress">
+		<id column="id" property="id" />
+		<result column="member_id" property="memberId" />
+		<result column="receiver_name" property="receiverName" />
+		<result column="receiver_phone" property="receiverPhone" />
+		<result column="province" property="province" />
+		<result column="city" property="city" />
+		<result column="region" property="region" />
+		<result column="detail_address" property="detailAddress" />
+		<result column="is_default" property="isDefault" />
+		<result column="is_deleted" property="isDeleted" />
+	</resultMap>
+
+	<update id="cannelDefault">
+		update pt_address set is_default = 0 where member_id = #{id}
+	</update>
+
+	<update id="cannelDefaultById">
+		update pt_address set is_default = 0 where id = #{id}
+	</update>
+
+	<update id="setDefault">
+		update pt_address set is_default = 1 where id = #{id} and member_id = #{memberId}
+	</update>
+
+	<update id="softDelete">
+		update pt_address set is_deleted = 1 where id = #{id}
+	</update>
+
+	<update id="updateEntityById" >
+		UPDATE pt_address
+		set
+			member_id = #{memberId}
+			<if test="receiverName != null and receiverName != ''">
+				,receiver_name = #{receiverName}
+			</if>
+			<if test="receiverPhone != null and receiverPhone != ''">
+				,receiver_phone = #{receiverPhone}
+			</if>
+			<if test="province != null and province != ''">
+				,province = #{province}
+			</if>
+			<if test="city != null and city != ''">
+				,city = #{city}
+			</if>
+			,region = #{region}
+			<if test="detailAddress != null and detailAddress != ''">
+				,detail_address = #{detailAddress}
+			</if>
+		where
+			id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <ImmediateFlush>false</ImmediateFlush>
+            <pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/mxm.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.home}/logs/mxm.%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <ImmediateFlush>false</ImmediateFlush>
+            <pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    
+    <appender name ="console_asyncFile" class= "ch.qos.logback.classic.AsyncAppender">
+		<!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+		<discardingThreshold >0</discardingThreshold>
+		<!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+		<queueSize>8192</queueSize>
+		<includeCallerData>true</includeCallerData>
+		<!-- 添加附加的appender,最多只能添加一个 -->
+		<appender-ref ref ="console"/>
+	</appender>
+	
+	
+    <!-- project default level -->
+    <logger name="com.coracle" level="DEBUG" />
+
+    <!--log4jdbc -->
+    <logger name="jdbc.sqltiming" level="DEBUG" />
+    
+    <logger name="org.hibernate.type" level="trace" />
+    <logger name="org.hibernate.sql" level="trace" />
+    <logger name="org.springframework.web.servlet.mvc.method" level="ERROR" additivity="false" />
+    <logger name="org.springframework.context.support" level="ERROR" additivity="false" />
+    <logger name="com.yunsunyun.config.mapper.ConfigMapper" level="ERROR" additivity="false" />
+    <logger name="org.apache.zookeeper" level="ERROR" additivity="false" />
+    <logger name="org.mongodb.driver.cluster" level="ERROR" additivity="false" />
+    <logger name="com.alibaba.dubbo.remoting.exchange.support.header" level="ERROR" additivity="false" />
+    <root level="DEBUG">
+        <!--<appender-ref ref="console" />-->
+        <appender-ref ref="console_asyncFile" />
+    </root>
+</configuration>
